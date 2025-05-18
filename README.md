@@ -1,4 +1,5 @@
-# 🌤️ Personalized Weather Alert System
+# Personalized Weather Alert System
+![Project Logo](logo.jpeg)
 
 This project is a smart, AI-powered pipeline that processes satellite weather data and personal user information to deliver **personalized alerts**. Whether it’s high pollen count or a stormy afternoon, our system ensures that users receive timely, tailored forecasts based on both environmental data and their specific sensitivities or preferences.
 
