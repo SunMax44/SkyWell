@@ -1,92 +1,44 @@
-# SkyWell
+# Copernicus Data Pipeline for Pollen and UV Data
 
-![Project Logo](logo.jpeg)
+This project implements a data pipeline for extracting real-time pollen and UV data from Copernicus satellite data, with a focus on the Berlin area.
 
----
+## Setup
 
-## ❗ Problem Statement
+1. Install the required dependencies:
+```bash
+pip install -r requirements.txt
+```
 
-Patients often lack clear, actionable insights tailored to their medical conditions. This leads to poor decision-making in daily routines, causing:
-- Increased **follow-up costs** — health deterioration, wasted time, and avoidable expenses.
-- Frustration from using **multiple apps** to gather fragmented weather, health, and alert information.
-- Annoyance due to **irrelevant notifications** and **generic forecasts** that don’t reflect their personal needs.
+2. Set up Copernicus Climate Data Store (CDS) API:
+   - Register at https://cds.climate.copernicus.eu/
+   - Create an API key
+   - Create a file `~/.cdsapirc` with your API key:
+   ```
+   url: https://cds.climate.copernicus.eu/api/v2
+   key: YOUR-API-KEY
+   ```
 
----
+## Usage
 
-## 🔍 Overview
+Run the data pipeline:
+```bash
+python data_pipeline.py
+```
 
-Our system provides **personalized alerts** based on satellite data and a user’s specific health profile. Whether you have pollen allergies, asthma, or heart issues, our platform helps you **act smarter** by adapting your routine to your condition and environment — **proactively**.
+The script will:
+1. Fetch UV and pollen data for Berlin
+2. Process the data
+3. Save the results in the `data` directory
 
----
+## Notes
 
-## 🔧 How It Works
+- The current implementation focuses on Berlin (coordinates: 52.5200°N, 13.4050°E)
+- The data pipeline is set up to fetch both real-time and forecast data
+- The processed data is saved in CSV format for easy access
 
-1. **Data Collection**  
-   Satellite and environmental data are continuously collected (e.g., temperature, pollen, humidity).
+## Next Steps
 
-2. **Data Processing**  
-   Raw data is structured and cleaned through preprocessing pipelines.
-
-3. **User Input**  
-   Users input relevant health information like chronic illnesses or sensitivities.
-
-4. **AI Modeling**  
-   Our AI model cross-references weather data with individual conditions to assess risk.
-
-5. **Forecast Display**  
-   A general weather forecast is displayed in-app for transparency.
-
-6. **Personalized Alerts**  
-   If the AI detects a threat based on the user’s profile, a **personalized alert** is sent.
-
----
-
-## 🧠 Architecture Diagram
-
-![Pipeline Diagram](pipeline.png)
-
-> Our end-to-end pipeline from satellite data ingestion to user alert generation.
-
----
-
-## ✨ Features
-
-- 🌍 Real-time satellite-based data
-- 🤒 Personalized condition-aware forecasting
-- 🔔 Smart, non-intrusive mobile alerts
-- 📱 Unified user interface (no app-hopping)
-- 🔐 Privacy-first data handling (GDPR-compliant)
-
----
-
-## 💻 Tech Stack
-
-| Layer            | Technology                         |
-|------------------|------------------------------------|
-| Data Ingestion   | Python, APIs (e.g., OpenWeather)   |
-| AI/ML            | Scikit-learn / TensorFlow / PyTorch|
-| Backend          | Flask / FastAPI                    |
-| Frontend         | React Native / Flutter             |
-| Database         | PostgreSQL / Firebase              |
-| Notification     | Firebase Cloud Messaging / Twilio  |
-| Deployment       | Docker, GitHub Actions, Vercel     |
-
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Python 3.8+
-- Node.js (for frontend)
-- PostgreSQL or Firebase account
-- API keys for weather and geolocation data
-
-## 🔍 Competitors & Our Edge
-  | Competitor               | Shortcomings                               | How We're Better                                       |
-| ------------------------ | ------------------------------------------ | ------------------------------------------------------ |
-| Generic Weather Apps     | One-size-fits-all notifications            | Personalized, condition-aware alerts                   |
-| Health Tracking Apps     | Lack real-time environmental integration   | Syncs live weather with user health conditions         |
-| Pollen/Allergy Apps      | Narrow focus, no general weather insights  | Holistic — includes weather, air quality, pollen, etc. |
-| Government Alert Systems | Delayed, region-only and impersonal alerts | Instant, hyper-personalized warnings via mobile        |
-
+1. Implement proper data processing based on actual Copernicus dataset structure
+2. Add visualization capabilities
+3. Implement forecast model if needed
+4. Extend to cover all of Europe 
