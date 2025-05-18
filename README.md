@@ -15,7 +15,7 @@ Patients often lack clear, actionable insights tailored to their medical conditi
 
 ## 🔍 Overview
 
-Our system provides **personalized weather alerts** based on satellite data and a user’s specific health profile. Whether you have pollen allergies, asthma, or heart issues, our platform helps you **act smarter** by adapting your routine to your condition and environment — **proactively**.
+Our system provides **personalized alerts** based on satellite data and a user’s specific health profile. Whether you have pollen allergies, asthma, or heart issues, our platform helps you **act smarter** by adapting your routine to your condition and environment — **proactively**.
 
 ---
 
