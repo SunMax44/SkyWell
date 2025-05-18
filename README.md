@@ -2,7 +2,7 @@
 
 ![Project Logo](data/images/logo.jpeg)
 
-This project is a smart, AI-powered pipeline that processes satellite weather data and personal user information to deliver **personalized weather alerts**. Whether it’s high pollen count or a stormy afternoon, our system ensures that users receive timely, tailored forecasts based on both environmental data and their specific sensitivities or preferences.
+This project is a smart, AI-powered pipeline that processes satellite weather data and personal user information to deliver **personalized weather alerts**. Whether it's high pollen count or a stormy afternoon, our system ensures that users receive timely, tailored forecasts based on both environmental data and their specific sensitivities or preferences.
 
 ## 🔍 Overview
 
@@ -37,6 +37,67 @@ We combine **satellite data** with **user-specific health profiles** to create a
 
 ![Pipeline Diagram](data/images/pipeline.png)
 
+---
+
+# 👩‍💻 Developer Guide
+
+## Mock Data Visualization
+
+The interactive map (`mock_visualization.py`) uses **mock data** to demonstrate the risk score calculation and visualization pipeline:
+- Mock UV and pollen data are generated for a grid over Berlin for several days.
+- A user-weighted "Risk Score" (1-10) is calculated for each grid cell, combining UV and pollen values.
+- The map displays colored rectangles for each cell, with popups showing the risk score, raw values, weights, and location.
+- This allows rapid prototyping and UI/UX development without requiring real data or API access.
+
+To run the mock visualization locally:
+```bash
+pip install -r requirements.txt
+python mock_visualization.py
+open data/interactive_map.html  # or open the file in your browser
+```
+
+## Real Data with Copernicus Jupyter Notebook
+
+To fetch and visualize **real Copernicus data**, use the provided Jupyter notebook (`get_real_uv_pollen_satellite_data.ipynb`).
+
+### Steps:
+1. **Get your Copernicus API credentials:**
+   - Register at https://cds.climate.copernicus.eu/
+   - Find your UID and API key in your account settings.
+   - Create a `.cdsapirc` file with:
+     ```
+     url: https://cds.climate.copernicus.eu/api/v2
+     key: <YOUR-UID>:<YOUR-API-KEY>
+     ```
+2. **Go to the Copernicus ADS Toolbox JupyterLab:**
+   - https://ads.atmosphere.copernicus.eu/toolbox
+   - Start a JupyterLab session.
+3. **Upload your `.cdsapirc` file** to your JupyterLab home directory (`/home/jovyan/`).
+4. **Upload the notebook `get_real_uv_pollen_satellite_data.ipynb`.**
+5. **Install required packages** (if needed) by running this in a notebook cell:
+   ```python
+   !pip install cdsapi xarray numpy matplotlib
+   ```
+6. **Run the notebook cells in order.**
+   - The notebook will fetch UV and pollen forecast data for Berlin (5-day window), calculate the risk score, and plot the results.
+   - You can adjust the user weights in the first code cell to match your profile.
+
+### Data Processing Concept (Coming Soon)
+
+The repository also includes a conceptual data processing prototype:  
+**`skywell_concept_data_processing.py`**
+
+- This file demonstrates the planned approach for personalized health risk scoring based on environmental data and user health profiles.
+- It uses mock thresholds, weights, and a sample user profile ("Claudia") to show how different environmental factors (e.g., PM2.5, pollen, UV) could be combined into a single risk score.
+- The script is implemented as a Streamlit app for interactive exploration and prototyping.
+- **Note:** This is a conceptual mockup for internal ideation and is not intended for external developer use yet. The full data processing pipeline is under development and will be released in a future update.
+
+## Notes
+- The mock map is for demonstration and prototyping only; real data requires Copernicus API access.
+- The Jupyter notebook is portable and can be shared or reused by anyone with Copernicus credentials.
+- For more advanced analysis or visualization, extend the notebook as needed.
+
+---
 
 ## Setup
 
@@ -75,6 +136,6 @@ The script will:
 ## Next Steps
 
 1. Implement proper data processing based on actual Copernicus dataset structure
-2. Add visualization capabilities
-3. Implement forecast model if needed
+2. Add more advanced visualization or interactivity
+3. Integrate with user-facing applications or machine learning models
 4. Extend to cover all of Europe 
