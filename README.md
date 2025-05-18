@@ -1,4 +1,6 @@
-# Copernicus Data Pipeline for Pollen and UV Data
+# SkyWell
+
+![Project Logo](data/images/logo.jpeg)
 
 This project implements a data pipeline for extracting real-time pollen and UV data from Copernicus satellite data, with a focus on the Berlin area.
 
