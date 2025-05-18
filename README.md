@@ -1,5 +1,7 @@
-# Personalized Weather Alert System
+
+# SkyWell
 ![Project Logo](logo.jpeg)
+
 
 This project is a smart, AI-powered pipeline that processes satellite weather data and personal user information to deliver **personalized alerts**. Whether it’s high pollen count or a stormy afternoon, our system ensures that users receive timely, tailored forecasts based on both environmental data and their specific sensitivities or preferences.
 
@@ -53,7 +55,4 @@ We combine **satellite data** with **user-specific health profiles** to create a
 
 ## 🧠 Architecture Diagram
 
-```plaintext
-Satellite --> Data Processing --> Forecast (Mobile App)
-                                  |
-User Profile ------------------> AI Model --> Personalized Alert --> User
+![Pipeline Diagram](pipeline.png)
