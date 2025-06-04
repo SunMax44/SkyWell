@@ -1,0 +1,130 @@
+💡 Project: SkyWell – Personalized Environmental Risk Advisor
+Goal:
+Build a data-focused MVP app that fetches CAMS + Sentinel-3 data for a single city (Berlin), calculates personalized environmental risk scores based on user health profiles, and outputs natural-language recommendations via a chatbot interface.
+
+Decision:
+To ship a working demo in 7 days, we trimmed the original 5-sprint plan to the core data engineering and basic UI functionality, while leaving hooks for future expansion.
+
+⚡ 7-Day MVP Roadmap (with Optional Expansion Hooks)
+Each day below is a self-contained step you can execute in order.
+
+🟦 Day 1 – Data Access (CAMS + Sentinel-3)
+Main tasks:
+
+Create etl/fetch.py to download today + 3-day CAMS forecasts for Berlin.
+
+Download demo Sentinel-3 UV GeoTIFF manually (skip GEE export for now).
+
+Save raw files under raw/YYYY-MM-DD/.
+
+Optional hook (future Sprint-1):
+
+Add etl/gee_export.py with a placeholder for future full UV export via GEE.
+
+🟦 Day 2 – Grid Harmonization
+Main tasks:
+
+In core/grid.py, reproject CAMS and Sentinel-3 data to a common 0.01° (~1 km) grid using xarray.
+
+Save daily variables (AQI, pollen, temp, UV) as COG files under data/YYYY-MM-DD_{var}.tif.
+
+Write a helper load_grid(date) that returns a dict of np.ndarray.
+
+Optional hook:
+
+Add a --history CLI flag to prepare for loading multiple days for 30-day rolling analysis.
+
+🟦 Day 3 – Risk Scoring + Advice Logic
+Main tasks:
+
+In core/risk.py, normalize input variables and compute a risk vector.
+
+In core/advice.py, define 8–10 rule-based advice categories based on user profiles (e.g., asthma, sun-sensitive).
+
+Implement choose_advice() returning a slug and short text.
+
+Add unit tests in tests/test_risk.py.
+
+Optional hook (future Sprint-3):
+
+Create selector_ml.py with a placeholder ML class for future advice prediction.
+
+🟦 Day 4 – REST API + Scripted Chat Response
+Main tasks:
+
+Create api/main.py (FastAPI):
+
+/risk: returns risk vector for lat, lon, date, profile.
+
+/chat: returns a Jinja-rendered advice sentence.
+
+Add chatbot/templates/ with 2–3 template examples.
+
+Implement a simple 4-day in-memory cache in api/cache.py.
+
+Optional hook (future Sprint-2):
+
+Create placeholder for /anomaly route and stub models/anomaly.py.
+
+🟦 Day 5 – Streamlit App
+Main tasks:
+
+Build ui/app.py:
+
+Sidebar: health profile checkboxes + date picker
+
+Center: show risk values and colored bars
+
+Button: “Ask SkyWell” → shows /chat result
+
+Optional: overlay a UV map using Folium and a COG raster
+
+Optional hook:
+
+Leave a TODO to switch map from local raster to cloud tile access once full COG store exists.
+
+🟦 Day 6 – Polish, Test, & Bundle
+Main tasks:
+
+Format with black, lint with ruff, and finalize README.
+
+Write a test for test_api.py that hits the FastAPI endpoints.
+
+Add a make demo or run_all.sh to launch API and Streamlit together.
+
+Optional hook:
+
+Add .env variable SKYWELL_MODE=lite/full to switch logic paths for future features.
+
+🟦 Day 7 – Deploy + Record Demo
+Main tasks:
+
+Push to GitHub and connect to Render.com (free tier).
+
+Deploy FastAPI and Streamlit as two services.
+
+Set a cron job on Render to run python etl/fetch.py every morning.
+
+Record a 1-minute Loom or GIF demo:
+
+Select health profile → click risk → get chatbot response.
+
+Optional hook:
+
+In Render YAML, add a commented worker service for “full rolling ETL” (to enable later).
+
+📂 Folder Structure for This Plan
+css
+Kopieren
+Bearbeiten
+skywell/
+├── etl/                → fetch.py, gee_export.py
+├── core/               → grid.py, risk.py, advice.py, selector_ml.py
+├── api/                → main.py, cache.py
+├── chatbot/            → templates/
+├── ui/                 → app.py
+├── raw/                → daily input files
+├── data/               → daily COG rasters
+├── tests/              → test_risk.py, test_api.py
+├── .github/workflows/  → etl.yml
+└── README.md
