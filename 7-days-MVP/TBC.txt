@@ -1,0 +1,52 @@
+Data Resolution and Interpolation Issues
+=====================================
+
+1. CAMS Data Resolution
+----------------------
+- Air Quality Data: 0.1° × 0.1° resolution (10×10 grid for Berlin)
+  * Contains: PM2.5, PM10, O3, NO2, SO2, pollen data
+  * Status: Usable but needs interpolation to target resolution
+
+- Atmospheric Composition Data: 0.4° × 0.4° resolution (3×3 grid for Berlin)
+  * Contains: UV data
+  * Status: Too coarse for Berlin (3×3 cells), needs alternative source
+
+2. Target Resolution
+-------------------
+- Current target: 0.01° × 0.01° (72×101 grid for Berlin)
+- Issue: Large upscaling from 10×10 to 72×101 might cause interpolation artifacts
+
+Next Steps
+==========
+
+1. UV Data
+----------
+- Find alternative data source for UV with better resolution
+- Consider sources:
+  * Copernicus Atmosphere Monitoring Service (CAMS) UV index
+  * ECMWF UV forecast data
+  * Local weather station data
+  * Satellite-based UV measurements
+
+2. Interpolation Code Review
+---------------------------
+- Review grid.py interpolation logic
+- Check for potential issues:
+  * How are we handling the large upscaling (10×10 to 72×101)?
+  * Are we using appropriate interpolation methods?
+  * Are we properly handling the time dimension?
+  * Are we correctly mapping the coordinates?
+
+3. Data Quality
+--------------
+- Add validation steps to ensure interpolated data makes sense
+- Compare interpolated values with original data
+- Add checks for unreasonable values or interpolation artifacts
+
+4. Documentation
+---------------
+- Document the resolution of each data source
+- Document the interpolation methods used
+- Add warnings about data quality limitations
+
+Note: These issues need to be addressed before proceeding with the risk calculation implementation. 

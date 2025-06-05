@@ -8,7 +8,7 @@ import xarray as xr
 import rioxarray as rio
 import numpy as np
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timedelta
 import zipfile
 import tempfile
 import shutil
@@ -111,8 +111,7 @@ def process_cams_global_uvi_data(grib_path, date):
         # Use .isel(step=0) to get the first forecast time step if multiple are present
         ds = xr.open_dataset(grib_path, engine='cfgrib')
 
-        # Assuming the variable name for UVI is 'uvbed'
-        # You might need to verify this from the grib file inspection if necessary.
+        # The variable name for UV biologically effective dose is 'uvbed' in the GRIB file
         uvi_data = ds['uvbed'].isel(step=0)
 
         # Create target grid
@@ -132,11 +131,11 @@ def process_cams_global_uvi_data(grib_path, date):
             uvi_interpolated.values,
             coords=[target_lats, target_lons],
             dims=['latitude', 'longitude'],
-            name='uvbed' # Use the original variable name
+            name='uv_biologically_effective_dose'  # Use the standardized name for output
         )
 
         # Convert to rioxarray and save as COG
-        output_path = Path('data') / f"{date}_uvbed.tif"
+        output_path = Path('data') / f"{date}_uv_biologically_effective_dose.tif"
         output_path.parent.mkdir(exist_ok=True)
 
         target_da.rio.to_raster(
@@ -183,14 +182,14 @@ def main():
     date_str = today.strftime('%Y-%m-%d')
     
     # Process CAMS air quality and pollen data (NetCDF)
-    cams_zip = Path('raw') / f"{date_str}_cams.nc.zip"
+    cams_zip = Path('7-days-MVP/raw') / f"{date_str}_cams_air_quality.nc.zip"
     if cams_zip.exists():
         process_cams_data(cams_zip, date_str)
     else:
         print(f"CAMS air quality and pollen data not found: {cams_zip}")
 
     # Process CAMS Global UVI data (GRIB)
-    uvi_grib = Path('raw') / f"{date_str}_cams_uvi.grib"
+    uvi_grib = Path('7-days-MVP/raw') / f"{date_str}_cams_atmos_composition.grib"
     if uvi_grib.exists():
         process_cams_global_uvi_data(uvi_grib, date_str)
     else:

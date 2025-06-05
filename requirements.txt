@@ -6,7 +6,7 @@ netCDF4==1.6.4
 matplotlib==3.7.2
 folium==0.14.0
 geopandas==0.13.2
-branca==0.6.0
+branca==0.6.0 
 rioxarray==0.15.0
 scipy==1.11.4
 cfgrib 
