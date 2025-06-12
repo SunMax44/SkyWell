@@ -41,7 +41,7 @@ CAMS_AIR_QUALITY_LEADTIME_HOUR = [
 ]
 CAMS_AIR_QUALITY_TYPE = ["forecast"]
 CAMS_AIR_QUALITY_LEVEL = ["0"] # metres above surface
-CAMS_AIR_QUALITY_AREA = [53, 13, 52, 14] # North, West, South, East
+CAMS_AIR_QUALITY_AREA = [53, 13, 52, 14]  # North, West, South, East
 
 # CAMS Atmospheric Composition Forecasts
 CAMS_ATMOS_COMPOSITION_DATASET = "cams-global-atmospheric-composition-forecasts"
@@ -54,7 +54,7 @@ CAMS_ATMOS_COMPOSITION_LEADTIME_HOUR = [
     "72", "80", "84", "88", "92", "96"
 ]
 CAMS_ATMOS_COMPOSITION_TYPE = ["forecast"]
-CAMS_ATMOS_COMPOSITION_AREA = [53, 13, 52, 14] # North, West, South, East
+CAMS_ATMOS_COMPOSITION_AREA = [53, 13, 52, 14]  # North, West, South, East
 
 def fetch_cams_air_quality_data(date):
     c = cdsapi.Client()
@@ -132,7 +132,8 @@ def main():
     today = datetime.utcnow().date()
     # Fetch today's forecast, which includes predictions for the next 4 days
     fetch_cams_air_quality_data(today)
-    fetch_cams_atmos_composition_data(today)
+    # Temporarily comment out UVI data fetching due to API issues
+    # fetch_cams_atmos_composition_data(today)
     print("Successfully fetched CAMS forecast data!")
 
 if __name__ == "__main__":
