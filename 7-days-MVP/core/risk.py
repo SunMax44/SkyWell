@@ -358,7 +358,15 @@ def calculate_sub_score(hazard_fraction: float, curve: str = 'linear', sensitivi
     if curve == 'logistic':
         hazard_fraction = 1/(1 + math.exp(-12*(hazard_fraction-0.5)))
     hazard_fraction = hazard_fraction**sensitivity
-    return int(round(1 + 9*hazard_fraction))
+    # Warn if hazard_fraction is above 1 (extreme event)
+    if hazard_fraction > 1:
+        logger.warning(f"Hazard fraction {hazard_fraction:.2f} exceeds 1.0 (extreme risk event)")
+    # Clip hazard_fraction to [0, 1] for scoring
+    hazard_fraction = max(0, min(hazard_fraction, 1))
+    sub_score = int(round(1 + 9*hazard_fraction))
+    # Ensure sub_score is always between 1 and 10
+    sub_score = max(1, min(sub_score, 10))
+    return sub_score
 
 def calculate_pollen_score(pollen_values: Dict[EnvironmentalVariable, float]) -> int:
     """
@@ -527,21 +535,20 @@ def calculate_risk_windows(
     return []
 
 def calculate_profile_risk(
-    profile: HealthProfile,
-    environmental_data: Dict[EnvironmentalVariable, xr.DataArray],
-    sensitivity: Optional[float] = None
+    profile: Optional[HealthProfile] = None,
+    environmental_data: Dict[EnvironmentalVariable, xr.DataArray] = None,
+    sensitivity: Optional[float] = None,
+    custom_weights: Optional[Dict[EnvironmentalVariable, float]] = None
 ) -> RiskAssessment:
     """
-    Calculate risk score for a health profile.
-    
+    Calculate risk score for a health profile or custom weights.
     Args:
-        profile: The health profile to assess
+        profile: The health profile to assess (optional if custom_weights is provided)
         environmental_data: Dictionary of environmental variables to their data
         sensitivity: Optional sensitivity override (default: None)
-        
+        custom_weights: Optional custom weights for variables (overrides profile)
     Returns:
         RiskAssessment: The calculated risk assessment
-        
     Raises:
         MissingDataError: If required data is missing
     """
@@ -549,21 +556,27 @@ def calculate_profile_risk(
     missing_variables = []
     extreme_events = {}
     beyond_scale = False
-    
+
+    # Use custom weights if provided, else use profile weights
+    if custom_weights is not None:
+        weights = custom_weights
+    elif profile is not None:
+        weights = HEALTH_PROFILES[profile].weights
+    else:
+        raise ValueError("Either profile or custom_weights must be provided.")
+
     # Calculate sub-scores for each driver
-    for var, weight in HEALTH_PROFILES[profile].weights.items():
+    for var, weight in weights.items():
         if var in environmental_data:
             try:
                 data = environmental_data[var]
                 validate_data(data, var)
                 value = float(data.mean())
-                
                 # Check for extreme events
                 if value > THRESHOLDS[var]['danger'] * 1.5:
                     beyond_scale = True
                     extreme_events[var] = value
                     value = THRESHOLDS[var]['danger']  # Cap at danger threshold
-                
                 # Special handling for pollen
                 if var in [p for group in POLLEN_GROUPS.values() for p in group]:
                     pollen_values = {var: value}
@@ -574,7 +587,6 @@ def calculate_profile_risk(
                     if profile == HealthProfile.ASTHMA_CHILD:
                         hazard = hazard * 1.2  # Increase hazard by 20% for children
                     sub_scores[var] = calculate_sub_score(hazard)
-                
             except DataError as e:
                 logger.error(f"Error processing {var.value}: {str(e)}")
                 missing_variables.append(var)
@@ -582,30 +594,30 @@ def calculate_profile_risk(
         else:
             missing_variables.append(var)
             sub_scores[var] = 1  # Default to lowest risk
-    
+
     # Calculate confidence based on missing data
     confidence = 1.0
     if missing_variables:
-        required_vars = set(HEALTH_PROFILES[profile].weights.keys())
+        required_vars = set(weights.keys())
         missing_ratio = len(missing_variables) / len(required_vars)
         confidence = 1.0 - (missing_ratio * 0.5)  # Reduce confidence by up to 50%
-    
+
     # Calculate final score
-    final_score = round(sum(w * sub_scores[d] for d, w in HEALTH_PROFILES[profile].weights.items()))
-    
+    final_score = round(sum(w * sub_scores[d] for d, w in weights.items()))
+
     # Dominant-pollutant override
     if any(score >= 9 for score in sub_scores.values()):
         final_score = max(sub_scores.values())
-    
+
     # Find top contributor
     top_contributor = max(sub_scores.items(), key=lambda x: x[1])
-    
+
     # Calculate risk windows
     risk_windows = {}
     for var in environmental_data:
         if var in VARIABLE_TIMING:
             risk_windows[var] = calculate_risk_windows(environmental_data[var], var)
-    
+
     return RiskAssessment(
         final_score=final_score,
         sub_scores=sub_scores,

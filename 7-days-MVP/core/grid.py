@@ -12,6 +12,9 @@ from datetime import datetime, timedelta
 import zipfile
 import tempfile
 import shutil
+import os
+from scipy.interpolate import RegularGridInterpolator
+import re
 # import cfgrib # Commented out as not needed for NetCDF
 
 # Constants
@@ -71,137 +74,98 @@ def extract_cams_netcdf(zip_path):
             shutil.copy(extracted_nc, persistent_nc)
             return persistent_nc
 
-def process_cams_data(zip_path, date):
-    """Process CAMS data and save individual variables as COG files."""
-    with tempfile.TemporaryDirectory() as tmpdir:
-        # Extract the NetCDF file
-        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-            zip_ref.extractall(tmpdir)
-            # Find the .nc file in the extracted contents
-            nc_files = list(Path(tmpdir).glob('*.nc'))
-            if not nc_files:
-                raise ValueError(f"No NetCDF file found in {zip_path}")
-            nc_path = nc_files[0]
-            
-            # Open and process the NetCDF file within the temporary directory context
-            ds = xr.open_dataset(nc_path, engine='netcdf4')
-            print(f"Source data dimensions: {ds.dims}")
-            
-            # Create target grid
-            target_lats, target_lons = create_target_grid()
-            
-            # Process each variable
-            for var in ds.data_vars:
-                # Skip non-environmental variables
-                if var in ['longitude', 'latitude', 'time']:
-                    continue
-                    
-                print(f"\nProcessing {var}...")
-                # Get the data for the first time step (current forecast)
-                data = ds[var].isel(time=0)
-
-                print(f"Source data shape: {data.shape}")
-                if np.any(np.isnan(data.values)):
-                    print(f"Warning: Source data for {var} contains NaN values before interpolation!")
-                
-                # Create a template DataArray for interpolation
-                template_da = xr.DataArray(
-                    np.empty((len(target_lats), len(target_lons))),
-                    coords={'latitude': target_lats, 'longitude': target_lons},
-                    dims=['latitude', 'longitude']
-                )
-                
-                # Interpolate to target grid using interp_like
-                target_data = data.interp_like(template_da, method='linear')
-                
-                # Assign the interpolated data to the target dataset
-                target_ds = xr.Dataset(
-                    coords={
-                        'latitude': target_lats,
-                        'longitude': target_lons
-                    }
-                )
-                
-                # Assign the interpolated data to the target dataset
-                target_ds[var] = target_data
-                
-                # Validate interpolation
-                if not validate_interpolation(data.values, target_ds[var].values, var):
-                    print(f"Skipping {var} due to validation failure")
-                    continue
-                
-                # Save as COG
-                output_path = Path('data') / f"{date}_{var}.tif"
-                output_path.parent.mkdir(exist_ok=True)
-                
-                # Convert to rioxarray and save as COG
-                target_ds[var].rio.to_raster(
-                    output_path,
-                    driver='COG',
-                    compress='LZW'
-                )
-                
-                print(f"Saved {var} to {output_path}")
-            
-            # Close the dataset to free up resources
-            ds.close()
-
-def process_cams_global_uvi_data(grib_path, date):
-    """Process CAMS Global UVI data from GRIB and save as COG file."""
-    print(f"Processing UVI data from {grib_path}...")
-    try:
-        # Open the GRIB file using xarray with the cfgrib engine
-        ds = xr.open_dataset(grib_path, engine='cfgrib')
-        print(f"Source UVI data dimensions: {ds.dims}")
-
-        # The variable name for UV biologically effective dose is 'uvbed' in the GRIB file
-        uvi_data = ds['uvbed'].isel(step=0)
-        print(f"Source UVI data shape: {uvi_data.shape}")
-
-        # Create target grid
-        target_lats, target_lons = create_target_grid()
-
-        # Interpolate to target grid
-        uvi_interpolated = uvi_data.interp(
-            latitude=target_lats,
-            longitude=target_lons,
-            method='linear'
-        )
-
-        # Validate interpolation
-        if not validate_interpolation(uvi_data.values, uvi_interpolated.values, 'uv_biologically_effective_dose'):
-            print("Skipping UVI data due to validation failure")
-            return
-
-        # Create a new DataArray with the target grid
-        target_da = xr.DataArray(
-            uvi_interpolated.values,
-            coords=[target_lats, target_lons],
-            dims=['latitude', 'longitude'],
-            name='uv_biologically_effective_dose'
-        )
-
-        # Convert to rioxarray and save as COG
-        output_path = Path('data') / f"{date}_uv_biologically_effective_dose.tif"
-        output_path.parent.mkdir(exist_ok=True)
-
-        target_da.rio.to_raster(
-            output_path,
-            driver='COG',
-            compress='LZW'
-        )
-
-        print(f"Saved UVI data to {output_path}")
-
-        ds.close()
-
-    except Exception as e:
-        print(f"Error processing UVI data: {e}")
+def process_cams_data(ds, target_lats, target_lons, output_dir, date_str):
+    """Process CAMS data and interpolate to target grid."""
+    os.makedirs(output_dir, exist_ok=True)
+    for var in ds.data_vars:
+        if var in ['longitude', 'latitude', 'time']:
+            continue
+        print(f"\nProcessing {var}...")
+        try:
+            data = ds[var].isel(time=0).squeeze()
+            print(f"Source data shape: {data.shape}")
+            if np.any(np.isnan(data.values)):
+                print(f"Warning: Source data for {var} contains NaN values before interpolation!")
+            source_lats = data.latitude.values
+            source_lons = data.longitude.values
+            interpolator = RegularGridInterpolator(
+                (source_lats, source_lons),
+                data.values,
+                method='linear',
+                bounds_error=False,
+                fill_value=None
+            )
+            target_lon_grid, target_lat_grid = np.meshgrid(target_lons, target_lats)
+            target_points = np.stack([target_lat_grid.flatten(), target_lon_grid.flatten()], axis=1)
+            target_data = interpolator(target_points).reshape(target_lat_grid.shape)
+            if not validate_interpolation(data.values, target_data, var):
+                print(f"Warning: Interpolation validation failed for {var}")
+                continue
+            output_ds = xr.Dataset(
+                data_vars={var: (['latitude', 'longitude'], target_data)},
+                coords={'latitude': target_lats, 'longitude': target_lons}
+            )
+            output_path = Path(output_dir) / f"{date_str}_{var}.tif"
+            output_ds[var].rio.to_raster(
+                output_path,
+                driver='COG',
+                compress='LZW'
+            )
+            print(f"Saved {var} to {output_path}")
+        except Exception as e:
+            print(f"Error processing {var}: {str(e)}")
+            continue
 
 def process_sentinel3_data(zip_path, date):
     """Process Sentinel-3 UV data and save as COG file."""
     # This function is no longer needed as we are not using Sentinel-3 for UV
     pass # Keep as a placeholder for now or remove if completely sure
+
+def process_uv_geotiff(uv_tif_path, target_lats, target_lons, output_dir, date_str):
+    """
+    Process UV GeoTIFF at 0.1° and interpolate to 0.01° grid, saving as COG.
+    Args:
+        uv_tif_path (str or Path): Path to the 0.1° UV GeoTIFF
+        target_lats (np.ndarray): Target latitude grid (0.01°)
+        target_lons (np.ndarray): Target longitude grid (0.01°)
+        output_dir (str or Path): Output directory for COG
+        date_str (str): Date string for output filename
+    """
+    print(f"\nProcessing UV GeoTIFF: {uv_tif_path}")
+    da = rio.open_rasterio(uv_tif_path)
+    # Remove band dimension if present
+    if da.ndim == 3:
+        da = da.isel(band=0)
+    source_lats = da.y.values
+    source_lons = da.x.values
+    # Ensure increasing order for interpolation
+    if np.any(np.diff(source_lats) < 0):
+        source_lats = source_lats[::-1]
+        da = da[::-1, :]
+    interpolator = RegularGridInterpolator(
+        (source_lats, source_lons),
+        da.values,
+        method='linear',
+        bounds_error=False,
+        fill_value=None
+    )
+    target_lon_grid, target_lat_grid = np.meshgrid(target_lons, target_lats)
+    target_points = np.stack([target_lat_grid.flatten(), target_lon_grid.flatten()], axis=1)
+    target_data = interpolator(target_points).reshape(target_lat_grid.shape)
+    if not validate_interpolation(da.values, target_data, 'uv_index'):
+        print("Warning: Interpolation validation failed for uv_index")
+        return
+    output_ds = xr.Dataset(
+        data_vars={'uv_index': (['latitude', 'longitude'], target_data)},
+        coords={'latitude': target_lats, 'longitude': target_lons}
+    )
+    output_path = Path(output_dir) / f"{date_str}_uv_index.tif"
+    output_ds['uv_index'].rio.to_raster(
+        output_path,
+        driver='COG',
+        compress='LZW'
+    )
+    print(f"Saved harmonized UV index to {output_path}")
 
 def load_grid(date):
     """Load all variables for a given date into a dictionary of numpy arrays."""
@@ -225,26 +189,32 @@ def load_grid(date):
     return grid_data
 
 def main():
-    """Main function to process today's data."""
-    today = datetime.utcnow().date()
-    date_str = today.strftime('%Y-%m-%d')
-    
-    # Process CAMS air quality and pollen data (NetCDF)
-    cams_zip = Path('raw') / f"{date_str}_cams_air_quality.nc.zip"
-    if cams_zip.exists():
-        process_cams_data(cams_zip, date_str)
+    """Main function to process all data."""
+    import glob
+    aq_files = sorted(glob.glob('raw/*_cams_air_quality.nc.zip'))
+    if aq_files:
+        latest_aq = aq_files[-1]
+        print(f"Using air quality file: {latest_aq}")
+        # Extract date from filename (expects format YYYY-MM-DD_cams_air_quality.nc.zip)
+        match = re.search(r'(\d{4}-\d{2}-\d{2})_cams_air_quality', latest_aq)
+        if match:
+            date_str = match.group(1)
+        else:
+            date_str = 'unknown_date'
+        nc_path = extract_cams_netcdf(latest_aq)
+        ds = xr.open_dataset(nc_path, engine='netcdf4')
+        target_lats, target_lons = create_target_grid()
+        process_cams_data(ds, target_lats, target_lons, 'data', date_str)
+        ds.close()
+        # --- Process UV GeoTIFF ---
+        uv_tif_path = Path('data') / f"{date_str}_uv_index.tif"
+        if uv_tif_path.exists():
+            process_uv_geotiff(uv_tif_path, target_lats, target_lons, 'data', date_str)
+        else:
+            print(f"No UV GeoTIFF found for {date_str} at {uv_tif_path}")
     else:
-        print(f"CAMS air quality and pollen data not found: {cams_zip}")
-
-    # Process CAMS Global UVI data (GRIB)
-    # uvi_grib = Path('raw') / f"{date_str}_cams_atmos_composition.grib"
-    # if uvi_grib.exists():
-    #     process_cams_global_uvi_data(uvi_grib, date_str)
-    # else:
-    #     print(f"CAMS Global UVI data not found: {uvi_grib}")
-
-    # Note: Sentinel-3 UV data processing is removed as we are using CAMS UVI.
-    # The placeholder function process_sentinel3_data remains but does nothing.
+        print("No CAMS air quality and pollen data file found in raw/ directory.")
+    # UVI section remains commented out
 
 if __name__ == "__main__":
     main() 

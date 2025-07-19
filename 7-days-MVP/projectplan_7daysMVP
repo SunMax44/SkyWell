@@ -77,6 +77,8 @@ Center: show risk values and colored bars
 
 Button: “Ask SkyWell” → shows /chat result
 
+**Add:** Customizable health profile option (user can select variables and assign weights)
+
 Optional: overlay a UV map using Folium and a COG raster
 
 Optional hook:
@@ -112,6 +114,15 @@ Select health profile → click risk → get chatbot response.
 Optional hook:
 
 In Render YAML, add a commented worker service for “full rolling ETL” (to enable later).
+
+---
+
+## Key Technical Decisions (added during MVP)
+- All environmental data (CAMS air quality/pollen, Open-Meteo UV) is fetched at 0.1° resolution and harmonized to a 0.01° grid for risk scoring and output.
+- Final sources: CAMS (air quality, pollen), Open-Meteo (UV index).
+- The backend supports customizable user-defined risk profiles (custom weights for variables).
+
+---
 
 📂 Folder Structure for This Plan
 css
