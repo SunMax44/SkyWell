@@ -33,12 +33,7 @@ CAMS_AIR_QUALITY_VARIABLES = [
 ]
 CAMS_AIR_QUALITY_MODEL = ["ensemble"]
 CAMS_AIR_QUALITY_TIMES = ["00:00"]  # Only 00:00 as we use leadtime_hour for other times
-CAMS_AIR_QUALITY_LEADTIME_HOUR = [
-    "0", "8", "12", "16", "20",
-    "24", "32", "36", "40", "44",
-    "48", "56", "60", "64", "68",
-    "72", "80", "84", "88", "92", "96"
-]
+CAMS_AIR_QUALITY_LEADTIME_HOUR = [str(i) for i in range(0, 97)]  # 0 to 96 hours, hourly
 CAMS_AIR_QUALITY_TYPE = ["forecast"]
 CAMS_AIR_QUALITY_LEVEL = ["0"] # metres above surface
 CAMS_AIR_QUALITY_AREA = [53, 13, 52, 14]  # North, West, South, East

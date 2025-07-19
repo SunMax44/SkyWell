@@ -38,9 +38,7 @@ BERLIN_BOUNDS = {
 # Grid resolution for UV (now 0.1° to match CAMS)
 UV_GRID_RESOLUTION = 0.1  # degrees
 
-def ensure_data_dir():
-    """Ensure the data directory exists."""
-    DATA_DIR.mkdir(parents=True, exist_ok=True)
+RAW_UV_DIR = Path("raw/uv")
 
 def fetch_uv_forecast(lat, lon):
     """
@@ -141,69 +139,15 @@ def fetch_uv_forecast_grid():
 
 def save_forecast(df):
     """
-    Save the forecast data to a CSV file.
-    
+    Save the forecast data to a CSV file in raw/uv/.
     Args:
         df (pd.DataFrame): Forecast data to save
     """
-    ensure_data_dir()
+    ensure_raw_uv_dir()
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = DATA_DIR / f"uv_forecast_{timestamp}.csv"
+    filename = RAW_UV_DIR / f"uv_forecast_{timestamp}.csv"
     df.to_csv(filename, index=False)
     logger.info(f"Saved forecast data to {filename}")
-
-def save_forecast_tif(df):
-    """
-    Save the forecast data as a GeoTIFF file compatible with the grid system.
-    
-    Args:
-        df (pd.DataFrame): Forecast data to save
-    """
-    # Get the current date for filename
-    current_date = datetime.now().strftime("%Y-%m-%d")
-    
-    # Create a pivot table to get UV values for each lat/lon
-    # Use the first time step for now (current UV index)
-    current_data = df[df['time'] == df['time'].min()].copy()
-    
-    if current_data.empty:
-        raise ValueError("No current UV data available")
-    
-    # Create a 2D grid
-    lats = sorted(current_data['latitude'].unique())
-    lons = sorted(current_data['longitude'].unique())
-    
-    # Create a 2D array
-    uv_grid = np.zeros((len(lats), len(lons)))
-    
-    for i, lat in enumerate(lats):
-        for j, lon in enumerate(lons):
-            mask = (current_data['latitude'] == lat) & (current_data['longitude'] == lon)
-            if mask.any():
-                uv_grid[i, j] = current_data.loc[mask, 'uv_index'].iloc[0]
-    
-    # Create xarray DataArray
-    da = xr.DataArray(
-        uv_grid,
-        coords={'latitude': lats, 'longitude': lons},
-        dims=['latitude', 'longitude'],
-        name='uv_index'
-    )
-    
-    # Set CRS using rioxarray
-    da = da.rio.write_crs("EPSG:4326")
-    
-    # Save as GeoTIFF in the main data directory
-    output_path = Path("data") / f"{current_date}_uv_index.tif"
-    output_path.parent.mkdir(exist_ok=True)
-    
-    da.rio.to_raster(
-        output_path,
-        driver='COG',
-        compress='LZW'
-    )
-    
-    logger.info(f"Saved UV data as GeoTIFF to {output_path}")
 
 def get_latest_forecast():
     """
@@ -215,7 +159,6 @@ def get_latest_forecast():
     try:
         df = fetch_uv_forecast_grid()
         save_forecast(df)
-        save_forecast_tif(df)  # Also save as GeoTIFF
         return df
     except Exception as e:
         logger.error(f"Error getting latest forecast: {str(e)}")

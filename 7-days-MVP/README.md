@@ -76,6 +76,76 @@ The SAFE and DANGER anchor values (e.g., PM₂.₅ 15–75 µg/m³, PM₁₀
 
 These references ensure the risk‑scoring model aligns with the latest clinically meaningful, evidence-based, and public-health-adopted thresholds for air quality and environmental health.
 
+## Standard Health Windows (Regulatory / Clinical)
+
+The following table summarizes the canonical short-term metrics ("health windows") used for each environmental driver, why these windows matter clinically, and the guideline sources:
+
+| Driver      | Canonical Short-Term Metric         | Why That Window Matters                                         | Guideline Source                |
+|-------------|-------------------------------------|-----------------------------------------------------------------|----------------------------------|
+| PM₂.₅ / PM₁₀ | 24-h running mean                   | Captures the inflammatory dose relevant to cardiac & respiratory admissions | WHO 2021 AQG ([who.int](https://www.who.int/publications/i/item/9789240034228)) |
+| O₃          | 8-h running mean (take day’s max)   | Broncho-constriction & ER visits track the previous 6–8 h of exposure | WHO 2021 AQG + EU directive ([who.int](https://www.who.int/publications/i/item/9789240034228), [eea.europa.eu](https://www.eea.europa.eu/)) |
+| NO₂         | 1-h mean (peak)                     | Rapid airway effects; most rules use 200 µg/m³ 1-h              | WHO 2021 AQG ([who.int](https://www.who.int/publications/i/item/9789240034228)) |
+| SO₂         | 1-h mean                            | Same logic (acute bronchospasm)                                 | WHO 2021 AQG ([who.int](https://www.who.int/publications/i/item/9789240034228)) |
+| UV Index    | Instantaneous or hourly; day’s max  | Erythema risk rises within minutes                              | WHO UV guidance ([who.int](https://www.who.int/uv/publications/en/)) |
+| Pollen      | Daily integrated count (midnight-midnight) | Symptom burden correlates with that day’s total grains          | Aerobiology consensus ([ecmwf.int](https://www.ecmwf.int/)) |
+
+These windows are chosen to reflect the most clinically meaningful and regulatory-relevant exposure periods for each risk driver, ensuring that risk scores and advice are aligned with public health and medical best practices.
+
+## Advice Source References
+
+The preventive measures and recommendations in the advice logic are based on a synthesis of clinical guidelines, public health sources, and expert consensus. Key references for specific actions include:
+
+- **Wrap-around sunglasses / eyewear:** healthline.com, uclahealth.org
+- **Shower & change after outdoor exposure:** mayoclinic.org
+- **Nasal lavage:** MayoClinic, Cochrane Handbook
+- **Surgical/N95/FFP2 masks outdoors:** uclahealth.org, healthline.com, PubMed COPD research
+- **Intranasal steroid/antihistamine:** PubMed article on rhinitis peak prevention
+- **Asthma action plan & controller medication:** GINA Guidelines (ginasthma.org), Asthma & Lung UK, San Antonio Asthma Action Plan Guide, ERS Publications
+- **Pre-exercise SABA use (asthma):** GINA 2023 Pocket Guide, NHLBI/NIH, Main Line Health, Guideline Central, American Thoracic Society, lung.org
+- **Skip vigorous outdoor exercise during spikes:** WHO, GINA
+- **Bedroom/indoor HEPA air cleaner:** PubMed studies, Hopkins Medicine, National Academies reports
+- **Rescue inhaler use for COPD:** American Lung Association, Main Line Health, lung.org, nhs.uk
+- **Influenza & pneumococcal vaccination (COPD):** COPD consensus sources, Asthma & Lung UK
+- **Stay indoors with recirc AC:** epa.gov
+- **Portable HEPA purifier benefits:** Hopkins Medicine
+- **Check BP/HR, cardiac meds compliance:** ESC Cardiology, health authority guidance
+- **Hydration & avoid smoking exposures:** lifestyle guidelines
+- **Reschedule exercise for heart/cardiac:** patient safety advisories
+- **Create clean-air room:** National Academies reports
+- **SPF sunscreen & sun-protective gear:** WHO UV guidance, dermatology advisories
+- **UPF clothing, hat, UV sunglasses:** Allure, WHO
+- **Avoid sun 10 AM–4 PM:** WHO
+- **UV-filter window film:** Vitiligo Society, Lupus support literature
+- **Hydration & Mediterranean diet for diabetes:** PubMed metabolic studies
+- **Allergy eye drops + artificial tears:** StatPearls, optometry sources
+- **Cool compresses:** Health.com
+- **Soak-and-seal baths, emollient soap replacements:** National Eczema Society, EuroGuiDerm
+- **Indoor HEPA + humidity control:** PubMed eczema research
+
+**Additional guideline and consensus sources:**
+- GINA (Global Initiative for Asthma) – ginasthma.org
+- American Lung Association – lung.org
+- Asthma & Lung UK
+- Main Line Health
+- NHLBI, NIH
+- ESC Cardiology
+- WHO (World Health Organization)
+- National Academies
+- Mayo Clinic
+- Cochrane Handbook
+- PubMed
+- epa.gov
+- ERS Publications
+- StatPearls
+- National Eczema Society
+- EuroGuiDerm
+- Vitiligo Society
+- Lupus support literature
+- Allure
+- Health.com
+
+These references ensure that all advice and preventive measures in SkyWell are grounded in up-to-date, evidence-based, and consensus clinical guidance.
+
 ## Development Status
 
 This is a 7-day MVP project. Current status: Day 1 - Data Access

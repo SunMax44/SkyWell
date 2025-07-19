@@ -15,6 +15,7 @@ import shutil
 import os
 from scipy.interpolate import RegularGridInterpolator
 import re
+import pandas as pd
 # import cfgrib # Commented out as not needed for NetCDF
 
 # Constants
@@ -167,6 +168,48 @@ def process_uv_geotiff(uv_tif_path, target_lats, target_lons, output_dir, date_s
     )
     print(f"Saved harmonized UV index to {output_path}")
 
+def process_uv_csv(uv_csv_path, target_lats, target_lons, output_dir, date_str):
+    """
+    Process raw UV CSV and interpolate to 0.01° grid, saving as COG.
+    Args:
+        uv_csv_path (str or Path): Path to the raw UV CSV
+        target_lats (np.ndarray): Target latitude grid (0.01°)
+        target_lons (np.ndarray): Target longitude grid (0.01°)
+        output_dir (str or Path): Output directory for COG
+        date_str (str): Date string for output filename
+    """
+    print(f"\nProcessing UV CSV: {uv_csv_path}")
+    df = pd.read_csv(uv_csv_path)
+    # Use the first time step for now (current UV index)
+    current_time = pd.to_datetime(df['time']).min()
+    current_data = df[df['time'] == current_time].copy()
+    if current_data.empty:
+        print("No current UV data available in CSV.")
+        return
+    lats = sorted(current_data['latitude'].unique())
+    lons = sorted(current_data['longitude'].unique())
+    uv_grid = np.zeros((len(lats), len(lons)))
+    for i, lat in enumerate(lats):
+        for j, lon in enumerate(lons):
+            mask = (current_data['latitude'] == lat) & (current_data['longitude'] == lon)
+            if mask.any():
+                uv_grid[i, j] = current_data.loc[mask, 'uv_index'].iloc[0]
+    da = xr.DataArray(
+        uv_grid,
+        coords={'latitude': lats, 'longitude': lons},
+        dims=['latitude', 'longitude'],
+        name='uv_index'
+    )
+    da = da.rio.write_crs("EPSG:4326")
+    output_path = Path(output_dir) / f"{date_str}_uv_index.tif"
+    output_path.parent.mkdir(exist_ok=True)
+    da.rio.to_raster(
+        output_path,
+        driver='COG',
+        compress='LZW'
+    )
+    print(f"Saved harmonized UV index to {output_path}")
+
 def load_grid(date):
     """Load all variables for a given date into a dictionary of numpy arrays."""
     data_dir = Path('data')
@@ -215,6 +258,12 @@ def main():
     else:
         print("No CAMS air quality and pollen data file found in raw/ directory.")
     # UVI section remains commented out
+    uv_csv_files = sorted(glob.glob('raw/uv/uv_forecast_*.csv'))
+    if uv_csv_files:
+        latest_uv_csv = uv_csv_files[-1]
+        process_uv_csv(latest_uv_csv, target_lats, target_lons, 'data', date_str)
+    else:
+        print(f"No UV CSV found in raw/uv/ for {date_str}")
 
 if __name__ == "__main__":
     main() 
