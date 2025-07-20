@@ -1,5 +1,6 @@
 [![ETL Workflow](https://github.com/SunMax44/SkyWell/actions/workflows/etl.yml/badge.svg)](https://github.com/SunMax44/SkyWell/actions/workflows/etl.yml)
 
+
 # SkyWell - Personalized Environmental Risk Advisor
 
 A data-focused MVP app that provides personalized environmental risk scores and recommendations based on user health profiles.
