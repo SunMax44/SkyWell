@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+  etl:
+    build:
+      context: .
+      dockerfile: Dockerfile.etl
+    depends_on:
+      - redis
+    volumes:
+      - ./data:/app/data
+      - ./raw:/app/raw
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+    restart: "no"
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - redis
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./raw:/app/raw
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+    restart: unless-stopped 

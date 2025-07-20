@@ -1,141 +1,106 @@
-💡 Project: SkyWell – Personalized Environmental Risk Advisor
+SkyWell – 7-Day MVP Plan (MVP-Only Version)
+
 Goal:
-Build a data-focused MVP app that fetches CAMS + Sentinel-3 data for a single city (Berlin), calculates personalized environmental risk scores based on user health profiles, and outputs natural-language recommendations via a chatbot interface.
-
-Decision:
-To ship a working demo in 7 days, we trimmed the original 5-sprint plan to the core data engineering and basic UI functionality, while leaving hooks for future expansion.
-
-⚡ 7-Day MVP Roadmap (with Optional Expansion Hooks)
-Each day below is a self-contained step you can execute in order.
-
-🟦 Day 1 – Data Access (CAMS + Sentinel-3)
-Main tasks:
-
-Create etl/fetch.py to download today + 3-day CAMS forecasts for Berlin.
-
-Download demo Sentinel-3 UV GeoTIFF manually (skip GEE export for now).
-
-Save raw files under raw/YYYY-MM-DD/.
-
-Optional hook (future Sprint-1):
-
-Add etl/gee_export.py with a placeholder for future full UV export via GEE.
-
-🟦 Day 2 – Grid Harmonization
-Main tasks:
-
-In core/grid.py, reproject CAMS and Sentinel-3 data to a common 0.01° (~1 km) grid using xarray.
-
-Save daily variables (AQI, pollen, temp, UV) as COG files under data/YYYY-MM-DD_{var}.tif.
-
-Write a helper load_grid(date) that returns a dict of np.ndarray.
-
-Optional hook:
-
-Add a --history CLI flag to prepare for loading multiple days for 30-day rolling analysis.
-
-🟦 Day 3 – Risk Scoring + Advice Logic
-Main tasks:
-
-In core/risk.py, normalize input variables and compute a risk vector.
-
-In core/advice.py, define 8–10 rule-based advice categories based on user profiles (e.g., asthma, sun-sensitive).
-
-Implement choose_advice() returning a slug and short text.
-
-Add unit tests in tests/test_risk.py.
-
-Optional hook (future Sprint-3):
-
-Create selector_ml.py with a placeholder ML class for future advice prediction.
-
-🟦 Day 4 – REST API + Scripted Chat Response
-Main tasks:
-
-Create api/main.py (FastAPI):
-
-/risk: returns risk vector for lat, lon, date, profile.
-
-/chat: returns a Jinja-rendered advice sentence.
-
-Add chatbot/templates/ with 2–3 template examples.
-
-Implement a simple 4-day in-memory cache in api/cache.py.
-
-Optional hook (future Sprint-2):
-
-Create placeholder for /anomaly route and stub models/anomaly.py.
-
-🟦 Day 5 – Streamlit App
-Main tasks:
-
-Build ui/app.py:
-
-Sidebar: health profile checkboxes + date picker
-
-Center: show risk values and colored bars
-
-Button: “Ask SkyWell” → shows /chat result
-
-**Add:** Customizable health profile option (user can select variables and assign weights)
-
-Optional: overlay a UV map using Folium and a COG raster
-
-Optional hook:
-
-Leave a TODO to switch map from local raster to cloud tile access once full COG store exists.
-
-🟦 Day 6 – Polish, Test, & Bundle
-Main tasks:
-
-Format with black, lint with ruff, and finalize README.
-
-Write a test for test_api.py that hits the FastAPI endpoints.
-
-Add a make demo or run_all.sh to launch API and Streamlit together.
-
-Optional hook:
-
-Add .env variable SKYWELL_MODE=lite/full to switch logic paths for future features.
-
-🟦 Day 7 – Deploy + Record Demo
-Main tasks:
-
-Push to GitHub and connect to Render.com (free tier).
-
-Deploy FastAPI and Streamlit as two services.
-
-Set a cron job on Render to run python etl/fetch.py every morning.
-
-Record a 1-minute Loom or GIF demo:
-
-Select health profile → click risk → get chatbot response.
-
-Optional hook:
-
-In Render YAML, add a commented worker service for “full rolling ETL” (to enable later).
+Build a data-focused MVP app that fetches CAMS & Sentinel-3 data for Berlin, calculates personalized environmental risk scores, and outputs natural-language recommendations via a chatbot interface. The MVP is production-like, using Docker, Redis, FastAPI, Jinja, and CI/CD with GitHub Actions.
 
 ---
 
-## Key Technical Decisions (added during MVP)
-- All environmental data (CAMS air quality/pollen, Open-Meteo UV) is fetched at 0.1° resolution and harmonized to a 0.01° grid for risk scoring and output.
-- Final sources: CAMS (air quality, pollen), Open-Meteo (UV index).
-- The backend supports customizable user-defined risk profiles (custom weights for variables).
+Day 1 – ETL Bootstrap & DevOps Setup
+- Scaffold repo and folders (etl/, core/, api/, ui/, tests/, .github/workflows/)
+- Create `.env.example` for API keys
+- Write `etl/fetch.py` to download today + 3-day CAMS forecast (AQI, pollen, temp) for Berlin
+- Download demo Sentinel-3 UV GeoTIFF
+- Add **Dockerfile for ETL**
+- Add **GitHub Actions workflow** (`.github/workflows/etl.yml`) to run fetch daily
+- Add **Docker Compose** (`docker-compose.yml`) for local orchestration
+- Add **Redis service** to `docker-compose.yml` (for caching)
+
+Day 2 – Grid Harmonisation
+- Implement `core/grid.py` to reproject CAMS/UV to 0.01° grid using xarray
+- Save as COGs in `data/`
+- Write `load_grid(date)` helper
+- Update Docker Compose to include all services (ETL, Redis, API)
+
+Day 3 – Risk & Advice Logic
+- Implement `core/risk.py` (min-max normalization, risk vector)
+- Implement `core/advice.py` (8–10 rule-based advice categories)
+- Implement `choose_advice()` function
+- Add `tests/test_risk.py`
+- Add **Dockerfile for backend** (FastAPI)
+
+Day 4 – REST API & Chatbot Script
+- Implement `api/main.py` using **FastAPI**
+  - `/risk` endpoint: returns risk vector as JSON
+  - `/chat` endpoint: returns Jinja2-rendered advice sentence
+- Add `chatbot/templates/` (Jinja2 templates for advice)
+- Implement `api/cache.py` using **Redis** for caching API responses
+- Add `tests/test_api.py`
+- Add **Docker Compose** for API + Redis
+
+Day 5 – UI (Streamlit or Alternative)
+- Implement `ui/app.py` (Streamlit or Gradio):
+  - Sidebar for health profile/date
+  - Calls `/risk` and `/chat`, displays results
+  - Button for map overlay (optional)
+- Add **Dockerfile for UI**
+- Add README run/deploy instructions
+- Add Makefile or `run_all.sh` to launch API + UI together
+
+Day 6 – Polish, Test, & CI/CD
+- Format with `black`, lint with `ruff`
+- Finalize README
+- Add integration test for API
+- Add **GitHub Actions** workflow (`.github/workflows/ci.yml`) for lint, test, build, ETL on push
+- Add `.env` management for secrets/configs
+
+Day 7 – Deploy & Demo
+- Push to GitHub
+- Deploy FastAPI + UI on Render.com (or similar, using Docker)
+- Set up Render cron job for ETL
+- Record demo video
 
 ---
 
-📂 Folder Structure for This Plan
-css
-Kopieren
-Bearbeiten
+Folder Structure
 skywell/
-├── etl/                → fetch.py, gee_export.py
-├── core/               → grid.py, risk.py, advice.py, selector_ml.py
-├── api/                → main.py, cache.py
-├── chatbot/            → templates/
-├── ui/                 → app.py
-├── raw/                → daily input files
-├── data/               → daily COG rasters
-├── tests/              → test_risk.py, test_api.py
-├── .github/workflows/  → etl.yml
+├── etl/
+│   └── fetch.py
+├── core/
+│   ├── grid.py
+│   ├── risk.py
+│   └── advice.py
+├── api/
+│   ├── main.py
+│   └── cache.py
+├── chatbot/
+│   └── templates/
+├── data/
+├── raw/
+├── tests/
+│   ├── test_risk.py
+│   └── test_api.py
+├── ui/
+│   └── app.py
+├── .github/
+│   └── workflows/
+│       ├── etl.yml
+│       └── ci.yml
+├── Dockerfile             # for backend
+├── Dockerfile.etl         # for ETL
+├── Dockerfile.ui          # for UI
+├── docker-compose.yml
+├── .env.example
+├── Makefile or run_all.sh
 └── README.md
+
+---
+
+Included Tools & Technologies
+| Tool         | Included? | Where/How Used                                  |
+|--------------|-----------|------------------------------------------------|
+| Docker       | Yes       | All services containerized, local/dev/prod      |
+| Jinja        | Yes       | Chatbot advice templates in FastAPI `/chat`     |
+| Redis        | Yes       | Caching API responses, via docker-compose       |
+| CI/CD        | Yes       | GitHub Actions for lint, test, build, ETL       |
+| FastAPI      | Yes       | Main backend API (`api/main.py`)                |
+| GitHubActions| Yes       | `.github/workflows/ci.yml`, `etl.yml`           |
