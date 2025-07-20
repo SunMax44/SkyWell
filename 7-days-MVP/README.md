@@ -1,4 +1,4 @@
-[![ETL Workflow](https://github.com/maxsonntag/SkyWell/actions/workflows/etl.yml/badge.svg)](https://github.com/maxsonntag/SkyWell/actions/workflows/etl.yml)
+[![ETL Workflow](https://github.com/SunMax44/SkyWell/actions/workflows/etl.yml/badge.svg)](https://github.com/SunMax44/SkyWell/actions/workflows/etl.yml)
 
 # SkyWell - Personalized Environmental Risk Advisor
 
