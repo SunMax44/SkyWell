@@ -13,7 +13,7 @@ import xarray as xr
 # Load .env for local development
 load_dotenv()
 
-RAW_DIR = Path(__file__).parent.parent / "raw"
+RAW_DIR = Path(__file__).parent.parent / "raw/cams"
 RAW_DIR.mkdir(parents=True, exist_ok=True)
 
 # CAMS Air Quality Forecasts

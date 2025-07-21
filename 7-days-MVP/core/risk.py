@@ -647,9 +647,9 @@ def load_environmental_data(date: str) -> Dict[EnvironmentalVariable, xr.DataArr
     
     for var in EnvironmentalVariable:
         if var == EnvironmentalVariable.UV:
-            file_path = data_dir / f"{date}_{var.value}.tif"
+            file_path = Path('data/uv') / f"{date}_uv_index.tif"
         else:
-            file_path = data_dir / f"{date}_{var.value}.tif"
+            file_path = Path('data/cams') / f"{date}_{var.value}.tif"
         
         if file_path.exists():
             try:

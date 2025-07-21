@@ -7,4 +7,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY etl/ ./etl/
 
-ENTRYPOINT ["python", "etl/fetch.py"] 
+ENTRYPOINT ["sh", "-c", "python etl/fetch_uv_data.py && python etl/fetch_cams_air_data.py"] 

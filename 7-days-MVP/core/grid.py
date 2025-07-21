@@ -71,7 +71,7 @@ def extract_cams_netcdf(zip_path):
                 raise ValueError(f"No NetCDF file found in {zip_path}")
             extracted_nc = nc_files[0]
             # Copy the extracted file to raw/ for persistence
-            persistent_nc = Path('raw') / extracted_nc.name
+            persistent_nc = Path('raw/cams') / extracted_nc.name
             shutil.copy(extracted_nc, persistent_nc)
             return persistent_nc
 
@@ -212,7 +212,7 @@ def process_uv_csv(uv_csv_path, target_lats, target_lons, output_dir, date_str):
 
 def load_grid(date):
     """Load all variables for a given date into a dictionary of numpy arrays."""
-    data_dir = Path('data')
+    data_dir = Path('data/cams')
     date_str = date.strftime('%Y-%m-%d')
     
     # Find all files for this date
@@ -234,7 +234,7 @@ def load_grid(date):
 def main():
     """Main function to process all data."""
     import glob
-    aq_files = sorted(glob.glob('raw/*_cams_air_quality.nc.zip'))
+    aq_files = sorted(glob.glob('raw/cams/*_cams_air_quality.nc.zip'))
     if aq_files:
         latest_aq = aq_files[-1]
         print(f"Using air quality file: {latest_aq}")
@@ -247,21 +247,21 @@ def main():
         nc_path = extract_cams_netcdf(latest_aq)
         ds = xr.open_dataset(nc_path, engine='netcdf4')
         target_lats, target_lons = create_target_grid()
-        process_cams_data(ds, target_lats, target_lons, 'data', date_str)
+        process_cams_data(ds, target_lats, target_lons, 'data/cams', date_str)
         ds.close()
         # --- Process UV GeoTIFF ---
-        uv_tif_path = Path('data') / f"{date_str}_uv_index.tif"
+        uv_tif_path = Path('data/cams') / f"{date_str}_uv_index.tif"
         if uv_tif_path.exists():
-            process_uv_geotiff(uv_tif_path, target_lats, target_lons, 'data', date_str)
+            process_uv_geotiff(uv_tif_path, target_lats, target_lons, 'data/cams', date_str)
         else:
             print(f"No UV GeoTIFF found for {date_str} at {uv_tif_path}")
     else:
-        print("No CAMS air quality and pollen data file found in raw/ directory.")
+        print("No CAMS air quality and pollen data file found in raw/cams/ directory.")
     # UVI section remains commented out
     uv_csv_files = sorted(glob.glob('raw/uv/uv_forecast_*.csv'))
     if uv_csv_files:
         latest_uv_csv = uv_csv_files[-1]
-        process_uv_csv(latest_uv_csv, target_lats, target_lons, 'data', date_str)
+        process_uv_csv(latest_uv_csv, target_lats, target_lons, 'data/uv', date_str)
     else:
         print(f"No UV CSV found in raw/uv/ for {date_str}")
 
