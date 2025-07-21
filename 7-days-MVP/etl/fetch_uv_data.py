@@ -143,7 +143,6 @@ def save_forecast(df):
     Args:
         df (pd.DataFrame): Forecast data to save
     """
-    ensure_raw_uv_dir()
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     filename = RAW_UV_DIR / f"uv_forecast_{timestamp}.csv"
     df.to_csv(filename, index=False)

@@ -14,7 +14,6 @@ import xarray as xr
 load_dotenv()
 
 RAW_DIR = Path(__file__).parent.parent / "raw/cams"
-RAW_DIR.mkdir(parents=True, exist_ok=True)
 
 # CAMS Air Quality Forecasts
 CAMS_AIR_QUALITY_DATASET = "cams-europe-air-quality-forecasts"

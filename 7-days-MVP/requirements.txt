@@ -16,3 +16,4 @@ cdsapi>=0.7.6
 earthengine-api>=0.1.363
 geemap>=0.25.0 
 aioredis>=2.0.1 
+gradio>=4.0.0 

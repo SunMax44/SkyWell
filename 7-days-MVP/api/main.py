@@ -15,7 +15,7 @@ TEMPLATE_DIR = Path(__file__).parent.parent / "chatbot/templates"
 jinja_env = Environment(loader=FileSystemLoader(str(TEMPLATE_DIR)))
 
 @app.get("/risk")
-@cache(ttl=60)
+@cache(ttl=14400)
 def get_risk(profile: Optional[str] = Query(None), date: Optional[str] = Query(None)):
     import datetime
     date_str = date or datetime.date.today().strftime("%Y-%m-%d")
@@ -34,7 +34,7 @@ def get_risk(profile: Optional[str] = Query(None), date: Optional[str] = Query(N
         return JSONResponse({"error": str(e)}, status_code=500)
 
 @app.get("/chat")
-@cache(ttl=60)
+@cache(ttl=14400)
 def get_chat(profile: Optional[str] = Query(None), date: Optional[str] = Query(None)):
     import datetime
     date_str = date or datetime.date.today().strftime("%Y-%m-%d")
