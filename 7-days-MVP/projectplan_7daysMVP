@@ -1,62 +1,70 @@
 SkyWell – 7-Day MVP Plan (MVP-Only Version)
 
 Goal:
-Build a data-focused MVP app that fetches CAMS & Sentinel-3 data for Berlin, calculates personalized environmental risk scores, and outputs natural-language recommendations via a chatbot interface. The MVP is production-like, using Docker, Redis, FastAPI, Jinja, and CI/CD with GitHub Actions.
-
----
+Build a data-focused MVP app that fetches CAMS and Open-Meteo data for Berlin, calculates personalized environmental risk scores, and returns natural-language recommendations via a Gradio chatbot interface. The MVP mimics production architecture with Docker, Redis, FastAPI, Jinja2, and GitHub Actions (CI/CD).
 
 Day 1 – ETL Bootstrap & DevOps Setup
 - Scaffold repo and folders (etl/, core/, api/, ui/, tests/, .github/workflows/)
-- Create `.env.example` for API keys
-- Write `etl/fetch.py` to download today + 3-day CAMS forecast (AQI, pollen, temp) for Berlin
-- Download demo Sentinel-3 UV GeoTIFF
-- Add **Dockerfile for ETL**
-- Add **GitHub Actions workflow** (`.github/workflows/etl.yml`) to run fetch daily
-- Add **Docker Compose** (`docker-compose.yml`) for local orchestration
-- Add **Redis service** to `docker-compose.yml` (for caching)
+- Create .env.example for API keys
+- Write etl/fetch.py to download today + 3-day CAMS air quality forecast for Berlin
+- Write etl/fetch_uv.py to download 4-day UV forecast via Open-Meteo API
+- Add Dockerfile for ETL
+- Add GitHub Actions workflow (etl.yml) to run ETL daily
+- Add Docker Compose (docker-compose.yml) for local orchestration
+- Add Redis service to docker-compose.yml for caching
 
 Day 2 – Grid Harmonisation
-- Implement `core/grid.py` to reproject CAMS/UV to 0.01° grid using xarray
-- Save as COGs in `data/`
-- Write `load_grid(date)` helper
+- Implement core/grid.py to reproject CAMS/UV data to 0.01° grid (using xarray)
+- Store harmonized output as Cloud-Optimized GeoTIFFs in data/
+- Write helper load_grid(date) to read datasets
 - Update Docker Compose to include all services (ETL, Redis, API)
 
 Day 3 – Risk & Advice Logic
-- Implement `core/risk.py` (min-max normalization, risk vector)
-- Implement `core/advice.py` (8–10 rule-based advice categories)
-- Implement `choose_advice()` function
-- Add `tests/test_risk.py`
-- Add **Dockerfile for backend** (FastAPI)
+- Implement core/risk.py: normalization, risk vector computation
+- Implement core/advice.py: rule-based mapping of risk values to advice (8–10 categories)
+- Add tests/test_risk.py
+- Add Dockerfile for backend (FastAPI)
+- Implement choose_advice() function
+- Add tests/test_risk.py
+- Add Dockerfile for backend (FastAPI)
 
 Day 4 – REST API & Chatbot Script
-- Implement `api/main.py` using **FastAPI**
-  - `/risk` endpoint: returns risk vector as JSON
-  - `/chat` endpoint: returns Jinja2-rendered advice sentence
-- Add `chatbot/templates/` (Jinja2 templates for advice)
-- Implement `api/cache.py` using **Redis** for caching API responses
-- Add `tests/test_api.py`
-- Add **Docker Compose** for API + Redis
+- Implement api/main.py using FastAPI
+- /risk: returns numeric risk vector as JSON
+- /chat: returns rendered advice sentence via Jinja2
+- Implement api/cache.py with Redis for caching responses
+- Add chatbot/templates/ for Jinja2 templates
+- Add tests/test_api.py
+- Update Docker Compose with API + Redis
 
-Day 5 – UI (Streamlit or Alternative)
-- Implement `ui/app.py` (Streamlit or Gradio):
-  - Sidebar for health profile/date
-  - Calls `/risk` and `/chat`, displays results
-  - Button for map overlay (optional)
-- Add **Dockerfile for UI**
-- Add README run/deploy instructions
-- Add Makefile or `run_all.sh` to launch API + UI together
+Day 5 – UI with Gradio
+- Implement ui/app.py using Gradio:
+- Form for health profile and date selection
+- Calls /risk and /chat endpoints
+- Displays personalized advice
+- Add Dockerfile for UI
+- Add README.md with run/deploy instructions
+- Add Makefile or run_all.sh to launch API + UI together
+-Calls /risk and /chat endpoints
+-Displays personalized advice
+-Add Dockerfile for UI
+-Add README.md with run/deploy instructions
+-Add Makefile or run_all.sh to launch API + UI together
 
-Day 6 – Polish, Test, & CI/CD
-- Format with `black`, lint with `ruff`
-- Finalize README
-- Add integration test for API
-- Add **GitHub Actions** workflow (`.github/workflows/ci.yml`) for lint, test, build, ETL on push
-- Add `.env` management for secrets/configs
+Day 6 – Polish, Test & CI/CD
+- Format code with black, lint with ruff
+- Finalize README.md
+- Add integration tests for API
+- Add GitHub Actions workflow (ci.yml) for lint/test/build/ETL
+- Set up .env management
+-Add integration tests for API
+-Add GitHub Actions workflow (ci.yml) for lint/test/build/ETL
+-Set up .env management
 
 Day 7 – Deploy & Demo
 - Push to GitHub
-- Deploy FastAPI + UI on Render.com (or similar, using Docker)
-- Set up Render cron job for ETL
+- Deploy backend + UI (e.g. on Render.com using Docker)
+- Schedule ETL as cron job on Render
 - Record demo video
 
 ---
