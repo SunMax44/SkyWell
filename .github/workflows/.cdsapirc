@@ -1,0 +1,2 @@
+url: https://ads.atmosphere.copernicus.eu/api
+key: ${CAMS_API_TOKEN}
