@@ -40,6 +40,18 @@ CAMS_AIR_QUALITY_AREA = [53, 13, 52, 14]  # North, West, South, East
 
 # Ensure the URL and API token are provided through environment variables
 def fetch_cams_air_quality_data(date):
+    # Check if running in GitHub Actions
+
+#if os.getenv("GITHUB_ACTIONS"):
+ #   # When in GitHub Actions, use the .cdsapirc file through CDSAPI_RC
+ #   cdsapi_rc_path = ".github/workflows/.cdsapirc"
+ #   if os.path.exists(cdsapi_rc_path):
+  #      c = cdsapi.Client()
+ #   else:
+        # Optionally, raise an error if the .cdsapirc is missing
+ #       raise ValueError("Missing .cdsapirc file in GitHub Actions environment.")
+#else:
+    # Locally, use the cdsapi.Client() directly without the .cdsapirc
     c = cdsapi.Client()
     
     date_str = date.strftime('%Y-%m-%d')
