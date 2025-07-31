@@ -13,6 +13,7 @@ jobs:
     env:
       CAMS_API_KEY: ${{ secrets.CAMS_API_KEY }}
       CDSAPI_RC: /home/runner/work/SkyWell/SkyWell/.github/workflows/.cdsapirc
+      IS_GITHUB_ACTIONS: true
 
     steps:
       - name: Checkout code
@@ -44,3 +45,11 @@ jobs:
         run: |
           python etl/fetch_cams_air_data.py
           python etl/fetch_uv_data.py
+
+      - name: Cache raw data
+        uses: actions/cache@v2
+        with:
+          path: 7-days-MVP/raw/cams
+          key: raw-data-${{ runner.os }}-${{ hashFiles('**/raw/cams/*.zip') }}
+          restore-keys: |
+            raw-data-${{ runner.os }}-

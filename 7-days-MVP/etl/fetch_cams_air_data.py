@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+s
 """
 Fetch CAMS air quality, pollen, and UVI data and save to raw/ directory.
 This script downloads forecast data as NetCDF and GRIB for selected variables and times.
@@ -14,7 +14,16 @@ import os
 # Load .env for local development
 load_dotenv()
 
-RAW_DIR = Path(__file__).parent.parent / "raw/cams"
+# Check if running in GitHub Actions by looking for the environment variable
+IS_GITHUB_ACTIONS = os.getenv("IS_GITHUB_ACTIONS")
+
+if IS_GITHUB_ACTIONS:
+    # Create directory if not present in GitHub Actions
+    RAW_DIR = Path("/home/runner/work/SkyWell/SkyWell/7-days-MVP/raw/cams")
+    RAW_DIR.mkdir(parents=True, exist_ok=True)  # Create the directory if it doesn't exist
+else:
+    # If running locally, use the relative path from the local directory
+    RAW_DIR = Path(__file__).parent.parent / "raw/cams"
 
 # CAMS Air Quality Forecasts
 CAMS_AIR_QUALITY_DATASET = "cams-europe-air-quality-forecasts"
@@ -40,19 +49,6 @@ CAMS_AIR_QUALITY_AREA = [53, 13, 52, 14]  # North, West, South, East
 
 # Ensure the URL and API token are provided through environment variables
 def fetch_cams_air_quality_data(date):
-    # Check if running in GitHub Actions
-
-#checkhcehcke
-#if os.getenv("GITHUB_ACTIONS"):
- #   # When in GitHub Actions, use the .cdsapirc file through CDSAPI_RC
- #   cdsapi_rc_path = ".github/workflows/.cdsapirc"
- #   if os.path.exists(cdsapi_rc_path):
-  #      c = cdsapi.Client()
- #   else:
-        # Optionally, raise an error if the .cdsapirc is missing
- #       raise ValueError("Missing .cdsapirc file in GitHub Actions environment.")
-#else:
-    # Locally, use the cdsapi.Client() directly without the .cdsapirc
     c = cdsapi.Client()
     
     date_str = date.strftime('%Y-%m-%d')
