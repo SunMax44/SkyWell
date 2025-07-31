@@ -42,6 +42,7 @@ CAMS_AIR_QUALITY_AREA = [53, 13, 52, 14]  # North, West, South, East
 def fetch_cams_air_quality_data(date):
     # Check if running in GitHub Actions
 
+#checkhcehcke
 #if os.getenv("GITHUB_ACTIONS"):
  #   # When in GitHub Actions, use the .cdsapirc file through CDSAPI_RC
  #   cdsapi_rc_path = ".github/workflows/.cdsapirc"
