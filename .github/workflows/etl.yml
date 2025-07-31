@@ -33,3 +33,5 @@ jobs:
         run: |
           python etl/fetch_cams_air_data.py
           python etl/fetch_uv_data.py
+
+
