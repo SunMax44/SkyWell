@@ -1,4 +1,3 @@
-s
 """
 Fetch CAMS air quality, pollen, and UVI data and save to raw/ directory.
 This script downloads forecast data as NetCDF and GRIB for selected variables and times.
