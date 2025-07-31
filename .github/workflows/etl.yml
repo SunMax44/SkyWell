@@ -11,7 +11,7 @@ jobs:
   run-etl:
     runs-on: ubuntu-latest
     env:
-      CAMS_API_TOKEN: ${{ secrets.CAMS_API_TOKEN }}  # Use GitHub Secrets for the API token
+      CAMS_API_TOKEN: ${{ secrets.CAMS_API_TOKEN }}  # GitHub Secret for CAMS API Token
 
     steps:
       # Step 1: Checkout code from the repository
@@ -30,19 +30,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r 7-days-MVP/requirements.txt
 
-      # Step 4: Create .cdsapirc file for Copernicus API access (without exposing the token)
-      - name: Create .cdsapirc file for Copernicus API access
-        run: |
-          echo "url: https://cds.climate.copernicus.eu/api" > ~/.cdsapirc
-          echo "key: ${{ secrets.CAMS_API_TOKEN }}" >> ~/.cdsapirc  # Use the token directly from secrets
-
-      # Step 5: Run ETL script to fetch data
+      # Step 4: Run ETL script to fetch data
       - name: Run ETL script
         working-directory: 7-days-MVP
         run: |
           python etl/fetch_cams_air_data.py
           python etl/fetch_uv_data.py
-
-      # Optional: Clean up token-related files
-      - name: Clean up .cdsapirc file
-        run: rm ~/.cdsapirc

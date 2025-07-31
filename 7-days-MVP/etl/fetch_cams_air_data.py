@@ -59,7 +59,7 @@ CAMS_ATMOS_COMPOSITION_TYPE = ["forecast"]
 CAMS_ATMOS_COMPOSITION_AREA = [53, 13, 52, 14]  # North, West, South, East
 
 def fetch_cams_air_quality_data(date):
-    c = cdsapi.Client(url="https://cds.climate.copernicus.eu/api", key=os.getenv("CAMS_API_TOKEN"))
+    c = cdsapi.Client()
     date_str = date.strftime('%Y-%m-%d')
     request = {
         "variable": CAMS_AIR_QUALITY_VARIABLES,
