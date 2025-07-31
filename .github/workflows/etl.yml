@@ -11,6 +11,7 @@ jobs:
   run-etl:
     runs-on: ubuntu-latest
     env:
+      CAMS_API_KEY: ${{ secrets.CAMS_API_KEY }}
       CDSAPI_RC: /home/runner/work/SkyWell/SkyWell/.github/workflows/.cdsapirc
 
     steps:
