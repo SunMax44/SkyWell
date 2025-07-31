@@ -28,6 +28,7 @@ jobs:
           echo "url: https://cds.climate.copernicus.eu/api" > ~/.cdsapirc
           echo "key: $CAMS_API_TOKEN" >> ~/.cdsapirc
       - name: Run ETL script
+        working-directory: 7-days-MVP
         run: |
           python etl/fetch_cams_air_data.py
           python etl/fetch_uv_data.py 
