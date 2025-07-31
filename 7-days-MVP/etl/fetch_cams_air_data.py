@@ -16,13 +16,6 @@ load_dotenv()
 
 RAW_DIR = Path(__file__).parent.parent / "raw/cams"
 
-# CAMS API Configuration
-#CAMS_API_URL = "https://cds.climate.copernicus.eu/api"
-#CAMS_API_KEY = os.getenv("CAMS_API_TOKEN")
-
-#if not CAMS_API_KEY:
-#    raise ValueError("CAMS_API_TOKEN environment variable is required")
-
 # CAMS Air Quality Forecasts
 CAMS_AIR_QUALITY_DATASET = "cams-europe-air-quality-forecasts"
 CAMS_AIR_QUALITY_VARIABLES = [
@@ -45,8 +38,18 @@ CAMS_AIR_QUALITY_TYPE = ["forecast"]
 CAMS_AIR_QUALITY_LEVEL = ["0"] # metres above surface
 CAMS_AIR_QUALITY_AREA = [53, 13, 52, 14]  # North, West, South, East
 
+# Ensure the URL and API token are provided through environment variables
 def fetch_cams_air_quality_data(date):
-    c = cdsapi.Client()
+    # Explicitly pass the URL and API key to avoid using .cdsapirc
+    CAMS_API_URL = os.getenv("CAMS_API_URL", "https://ads.atmosphere.copernicus.eu/api")
+    CAMS_API_KEY = os.getenv("CAMS_API_TOKEN")
+
+    if not CAMS_API_KEY:
+        raise ValueError("CAMS_API_TOKEN environment variable is required")
+    
+    # Initialize the cdsapi client with the correct URL and key from the environment
+    c = cdsapi.Client(url=CAMS_API_URL, key=CAMS_API_KEY)
+    
     date_str = date.strftime('%Y-%m-%d')
     request = {
         "variable": CAMS_AIR_QUALITY_VARIABLES,
@@ -59,6 +62,7 @@ def fetch_cams_air_quality_data(date):
         "data_format": "netcdf_zip",
         "area": CAMS_AIR_QUALITY_AREA
     }
+
     target_file = RAW_DIR / f"{date_str}_cams_air_quality.nc.zip"
     print(f"Requesting CAMS Air Quality data for {date_str}...")
     c.retrieve(CAMS_AIR_QUALITY_DATASET, request, str(target_file))
@@ -68,9 +72,7 @@ def main():
     today = datetime.utcnow().date()
     # Fetch today's forecast, which includes predictions for the next 4 days
     fetch_cams_air_quality_data(today)
-    # Temporarily comment out UVI data fetching due to API issues
-    # fetch_cams_atmos_composition_data(today)
     print("Successfully fetched CAMS forecast data!")
 
 if __name__ == "__main__":
-    main() 
+    main()
