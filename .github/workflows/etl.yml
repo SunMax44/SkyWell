@@ -11,52 +11,27 @@ jobs:
   run-etl:
     runs-on: ubuntu-latest
     env:
-      CAMS_API_TOKEN: ${{ secrets.CAMS_API_TOKEN }}
+      CAMS_API_TOKEN: ${{ secrets.CAMS_API_TOKEN }}  # Directly use the token from GitHub Secrets
     steps:
-      # Step 1: Store CAMS_API_TOKEN temporarily in an encrypted file
-      - name: Store CAMS_API_TOKEN temporarily in an encrypted file
-        run: |
-          echo $CAMS_API_TOKEN > ~/.cams_api_token.txt
-          chmod 600 ~/.cams_api_token.txt  # Ensure file permissions are restricted
-
-      # Step 2: Checkout code from the repository
+      # Step 1: Checkout code from the repository
       - name: Checkout code
         uses: actions/checkout@v3
         
-      # Step 3: Set up Python environment
+      # Step 2: Set up Python environment
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
         
-      # Step 4: Install dependencies
+      # Step 3: Install dependencies
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r 7-days-MVP/requirements.txt
-        
-      # Step 5: Debug CAMS_API_TOKEN content (use only for debugging)
-      - name: Print CAMS_API_TOKEN to verify
-        run: |
-          echo $CAMS_API_TOKEN  # This will print the token for debugging purposes
 
-      # Step 6: Create .cdsapirc file for Copernicus API access
-      - name: Create .cdsapirc
-        run: |
-          echo "url: https://cds.climate.copernicus.eu/api" > ~/.cdsapirc
-          echo "key: $(cat ~/.cams_api_token.txt)" >> ~/.cdsapirc  # Using the token file here
-
-      # Step 7: Check .cdsapirc contents (use only for debugging)
-      - name: Check .cdsapirc contents
-        run: cat ~/.cdsapirc  # Debugging step, do not leave in production
-
-      # Step 8: Run ETL script to fetch data
+      # Step 4: Run ETL script to fetch data
       - name: Run ETL script
         working-directory: 7-days-MVP
         run: |
           python etl/fetch_cams_air_data.py
           python etl/fetch_uv_data.py
-
-      # Optional: Clean up token file after use
-      - name: Clean up token file
-        run: rm ~/.cams_api_token.txt
