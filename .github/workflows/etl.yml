@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CAMS_API_TOKEN: ${{ secrets.CAMS_API_TOKEN }}
-      CDSAPI_RC: /home/runner/work/SkyWell/SkyWell/.github/workflows/.cdsapirc
+      CDSAPI_RC: .github/workflows/.cdsapirc
 
     steps:
       - name: Checkout code
