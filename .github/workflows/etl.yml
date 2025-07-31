@@ -36,17 +36,20 @@ jobs:
           pip install -r 7-days-MVP/requirements.txt
         
       # Step 5: Debug CAMS_API_TOKEN content (use only for debugging)
-      - name: Debug CAMS_API_TOKEN content
-        run: |
-          cat ~/.cams_api_token.txt  # Print the content (do this only for debugging)
+      - name: Debug CAMS_API_TOKEN in GitHub Actions
+        run: echo "CAMS_API_TOKEN is set: $CAMS_API_TOKEN"  # Debugging step
 
-      # Step 6: Create .cdsapirc file for Copernicus API access
+      # Step 6: Check .cdsapirc contents (use only for debugging)
+      - name: Check .cdsapirc contents
+        run: cat ~/.cdsapirc  # Debugging step, do not leave in production
+
+      # Step 7: Create .cdsapirc file for Copernicus API access
       - name: Create .cdsapirc
         run: |
           echo "url: https://cds.climate.copernicus.eu/api" > ~/.cdsapirc
           echo "key: $(cat ~/.cams_api_token.txt)" >> ~/.cdsapirc  # Using the token file here
 
-      # Step 7: Run ETL script to fetch data
+      # Step 8: Run ETL script to fetch data
       - name: Run ETL script
         working-directory: 7-days-MVP
         run: |
