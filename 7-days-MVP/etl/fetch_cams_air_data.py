@@ -17,11 +17,11 @@ load_dotenv()
 RAW_DIR = Path(__file__).parent.parent / "raw/cams"
 
 # CAMS API Configuration
-CAMS_API_URL = "https://cds.climate.copernicus.eu/api"
-CAMS_API_KEY = os.getenv("CAMS_API_TOKEN")
+#CAMS_API_URL = "https://cds.climate.copernicus.eu/api"
+#CAMS_API_KEY = os.getenv("CAMS_API_TOKEN")
 
-if not CAMS_API_KEY:
-    raise ValueError("CAMS_API_TOKEN environment variable is required")
+#if not CAMS_API_KEY:
+#    raise ValueError("CAMS_API_TOKEN environment variable is required")
 
 # CAMS Air Quality Forecasts
 CAMS_AIR_QUALITY_DATASET = "cams-europe-air-quality-forecasts"
@@ -45,21 +45,8 @@ CAMS_AIR_QUALITY_TYPE = ["forecast"]
 CAMS_AIR_QUALITY_LEVEL = ["0"] # metres above surface
 CAMS_AIR_QUALITY_AREA = [53, 13, 52, 14]  # North, West, South, East
 
-# CAMS Atmospheric Composition Forecasts
-CAMS_ATMOS_COMPOSITION_DATASET = "cams-global-atmospheric-composition-forecasts"
-CAMS_ATMOS_COMPOSITION_VARIABLE = ["uv_biologically_effective_dose"]
-CAMS_ATMOS_COMPOSITION_TIMES = ["00:00"]  # Only 00:00 as we use leadtime_hour for other times
-CAMS_ATMOS_COMPOSITION_LEADTIME_HOUR = [
-    "0", "8", "12", "16", "20",
-    "24", "32", "36", "40", "44",
-    "48", "56", "60", "64", "68",
-    "72", "80", "84", "88", "92", "96"
-]
-CAMS_ATMOS_COMPOSITION_TYPE = ["forecast"]
-CAMS_ATMOS_COMPOSITION_AREA = [53, 13, 52, 14]  # North, West, South, East
-
 def fetch_cams_air_quality_data(date):
-    c = cdsapi.Client(url="https://ads.atmosphere.copernicus.eu/api", key=os.getenv("CAMS_API_TOKEN"))
+    c = cdsapi.Client()
     date_str = date.strftime('%Y-%m-%d')
     request = {
         "variable": CAMS_AIR_QUALITY_VARIABLES,

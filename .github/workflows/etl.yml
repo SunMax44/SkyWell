@@ -27,17 +27,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r 7-days-MVP/requirements.txt
 
-      - name: Create .cdsapirc file for Copernicus API access
-        run: |
-          echo "url: https://ads.atmosphere.copernicus.eu/api" > ~/.cdsapirc  # Correct URL for CAMS API
-          echo "key: ${{ secrets.CAMS_API_TOKEN }}" >> ~/.cdsapirc
-
       - name: Run ETL script
         working-directory: 7-days-MVP
         run: |
           python etl/fetch_cams_air_data.py
           python etl/fetch_uv_data.py
-
-      # Clean up .cdsapirc file after use
-      - name: Clean up .cdsapirc file
-        run: rm ~/.cdsapirc
