@@ -40,15 +40,7 @@ CAMS_AIR_QUALITY_AREA = [53, 13, 52, 14]  # North, West, South, East
 
 # Ensure the URL and API token are provided through environment variables
 def fetch_cams_air_quality_data(date):
-    # Explicitly pass the URL and API key to avoid using .cdsapirc
-    CAMS_API_URL = os.getenv("CAMS_API_URL", "https://ads.atmosphere.copernicus.eu/api")
-    CAMS_API_KEY = os.getenv("CAMS_API_TOKEN")
-
-    if not CAMS_API_KEY:
-        raise ValueError("CAMS_API_TOKEN environment variable is required")
-    
-    # Initialize the cdsapi client with the correct URL and key from the environment
-    c = cdsapi.Client(url=CAMS_API_URL, key=CAMS_API_KEY)
+    c = cdsapi.Client()
     
     date_str = date.strftime('%Y-%m-%d')
     request = {

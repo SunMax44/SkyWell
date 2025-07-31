@@ -27,6 +27,20 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r 7-days-MVP/requirements.txt
 
+      # Dynamically create .cdsapirc file
+      - name: Create .cdsapirc file for Copernicus API
+        run: |
+          echo "url: https://ads.atmosphere.copernicus.eu/api" > ~/.cdsapirc
+          echo "key: ${{ secrets.CAMS_API_TOKEN }}" >> ~/.cdsapirc
+
+      # Verify the .cdsapirc file
+      - name: Verify .cdsapirc file creation
+        run: cat ~/.cdsapirc
+
+      # Check if .cdsapirc file exists
+      - name: Check if .cdsapirc file exists
+        run: ls -l ~/.cdsapirc
+
       - name: Run ETL script
         working-directory: 7-days-MVP
         run: |
