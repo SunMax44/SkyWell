@@ -27,6 +27,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r 7-days-MVP/requirements.txt
 
+      # Test the .cdsapirc file and verify it's being used
+      - name: Check .cdsapirc content
+        run: |
+          echo "Checking .cdsapirc file content:"
+          cat /home/runner/work/SkyWell/SkyWell/.github/workflows/.cdsapirc
+
+      # Run ETL script
       - name: Run ETL script
         working-directory: 7-days-MVP
         run: |
