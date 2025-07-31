@@ -47,7 +47,7 @@ jobs:
           python etl/fetch_uv_data.py
 
       - name: Cache raw data
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: 7-days-MVP/raw/cams
           key: raw-data-${{ runner.os }}-${{ hashFiles('**/raw/cams/*.zip') }}
