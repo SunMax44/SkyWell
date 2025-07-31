@@ -11,6 +11,7 @@ jobs:
   run-etl:
     runs-on: ubuntu-latest
     env:
+      CAMS_API_KEY: ${{ secrets.CAMS_API_KEY }}
       CDSAPI_RC: /home/runner/work/SkyWell/SkyWell/.github/workflows/.cdsapirc
 
     steps:
@@ -27,11 +28,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r 7-days-MVP/requirements.txt
 
-      # Test the .cdsapirc file and verify it's being used
-      - name: Check .cdsapirc content
+      # Step to correctly populate the .cdsapirc file with the secret at the right path
+      - name: Create .cdsapirc with API key at correct path
         run: |
-          echo "Checking .cdsapirc file content:"
-          cat /home/runner/work/SkyWell/SkyWell/.github/workflows/.cdsapirc
+          echo "url: https://ads.atmosphere.copernicus.eu/api" > /home/runner/work/SkyWell/SkyWell/.github/workflows/.cdsapirc
+          echo "key: ${CAMS_API_KEY}" >> /home/runner/work/SkyWell/SkyWell/.github/workflows/.cdsapirc
+
+      # Check the .cdsapirc file to ensure the key substitution works
+      - name: Check .cdsapirc content
+        run: cat /home/runner/work/SkyWell/SkyWell/.github/workflows/.cdsapirc
 
       # Run ETL script
       - name: Run ETL script
