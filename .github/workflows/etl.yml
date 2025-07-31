@@ -37,7 +37,7 @@ jobs:
         
       # Step 5: Debug CAMS_API_TOKEN content (use only for debugging)
       - name: Debug CAMS_API_TOKEN in GitHub Actions
-        run: echo "CAMS_API_TOKEN is set: $CAMS_API_TOKEN"  # Debugging step
+        run: echo "CAMS_API_TOKEN is set: ${{ secrets.CAMS_API_TOKEN }}"  # Debugging step
 
       # Step 6: Check .cdsapirc contents (use only for debugging)
       - name: Check .cdsapirc contents
