@@ -9,11 +9,19 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from dotenv import load_dotenv
 import xarray as xr
+import os
 
 # Load .env for local development
 load_dotenv()
 
 RAW_DIR = Path(__file__).parent.parent / "raw/cams"
+
+# CAMS API Configuration
+CAMS_API_URL = "https://cds.climate.copernicus.eu/api"
+CAMS_API_KEY = os.getenv("CAMS_API_TOKEN")
+
+if not CAMS_API_KEY:
+    raise ValueError("CAMS_API_TOKEN environment variable is required")
 
 # CAMS Air Quality Forecasts
 CAMS_AIR_QUALITY_DATASET = "cams-europe-air-quality-forecasts"
@@ -56,21 +64,21 @@ def fetch_cams_air_quality_data(date):
     request = {
         "variable": CAMS_AIR_QUALITY_VARIABLES,
         "model": CAMS_AIR_QUALITY_MODEL,
+        "level": CAMS_AIR_QUALITY_LEVEL,
         "date": [f"{date_str}/{date_str}"],
+        "type": CAMS_AIR_QUALITY_TYPE,
         "time": CAMS_AIR_QUALITY_TIMES,
         "leadtime_hour": CAMS_AIR_QUALITY_LEADTIME_HOUR,
-        "type": CAMS_AIR_QUALITY_TYPE,
-        "level": CAMS_AIR_QUALITY_LEVEL,
-        "data_format": "netcdf_zip",  # Changed back to netcdf_zip format
+        "data_format": "netcdf_zip",
         "area": CAMS_AIR_QUALITY_AREA
     }
-    target_file = RAW_DIR / f"{date_str}_cams_air_quality.nc.zip"  # Changed file extension to match format
+    target_file = RAW_DIR / f"{date_str}_cams_air_quality.nc.zip"
     print(f"Requesting CAMS Air Quality data for {date_str}...")
     c.retrieve(CAMS_AIR_QUALITY_DATASET, request, str(target_file))
     print(f"Saved CAMS Air Quality data to {target_file}")
 
 def fetch_cams_atmos_composition_data(date):
-    c = cdsapi.Client()
+    c = cdsapi.Client(url=CAMS_API_URL, key=CAMS_API_KEY)
     date_str = date.strftime('%Y-%m-%d')
 
     # First, retrieve the surface pressure for Berlin

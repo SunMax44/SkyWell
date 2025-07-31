@@ -10,6 +10,8 @@ on:
 jobs:
   run-etl:
     runs-on: ubuntu-latest
+    env:
+      CAMS_API_TOKEN: ${{ secrets.CAMS_API_TOKEN }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -21,6 +23,11 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+      - name: Create .cdsapirc
+        run: |
+          echo "url: https://cds.climate.copernicus.eu/api" > ~/.cdsapirc
+          echo "key: $CAMS_API_TOKEN" >> ~/.cdsapirc
       - name: Run ETL script
         run: |
-          python etl/fetch.py 
+          python etl/fetch_cams_air_data.py
+          python etl/fetch_uv_data.py 

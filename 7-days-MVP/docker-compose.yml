@@ -18,6 +18,7 @@ services:
       - ./raw:/app/raw
     environment:
       - REDIS_URL=redis://redis:6379/0
+      - CAMS_API_TOKEN=${CAMS_API_TOKEN}
     restart: "no"
 
   api:
