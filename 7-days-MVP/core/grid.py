@@ -180,6 +180,7 @@ def process_uv_csv(uv_csv_path, target_lats, target_lons, output_dir, date_str):
     """
     print(f"\nProcessing UV CSV: {uv_csv_path}")
     df = pd.read_csv(uv_csv_path)
+    df["time"] = pd.to_datetime(df["time"])
     # Use the first time step for now (current UV index)
     current_time = pd.to_datetime(df['time']).min()
     current_data = df[df['time'] == current_time].copy()

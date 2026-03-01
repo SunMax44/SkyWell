@@ -46,6 +46,11 @@ jobs:
           python etl/fetch_cams_air_data.py
           python etl/fetch_uv_data.py
 
+      - name: Harmonise to COG grid
+        working-directory: 7-days-MVP
+        run: |
+          python core/grid.py
+
       - name: Cache raw data
         uses: actions/cache@v3
         with:
