@@ -130,6 +130,11 @@ def fetch_uv_forecast_grid():
         try:
             logger.info(f"Fetching UV data for lat={lat}, lon={lon} ({i}/{total_points})")
             data = fetch_uv_forecast(lat, lon)
+            if data is None:
+                logger.warning(
+                    f"Skipping lat={lat:.2f}, lon={lon:.2f} after failed retries"
+                )
+                continue
             df = process_forecast_data(data, lat, lon)
             all_data.append(df)
             time.sleep(RATE_LIMIT_DELAY)  # Add delay between requests
@@ -137,6 +142,9 @@ def fetch_uv_forecast_grid():
             logger.error(f"Error processing data for lat={lat}, lon={lon}: {str(e)}")
             continue
     
+    logger.info(
+    f"Successfully fetched {len(all_data)} / {total_points} grid points"
+    )
     if not all_data:
         raise ValueError("No data was successfully fetched")
     
