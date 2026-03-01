@@ -61,9 +61,14 @@ def fetch_uv_forecast(lat, lon):
     
     for attempt in range(MAX_RETRIES):
         try:
-            response = requests.get(BASE_URL, params=params)
+            response = requests.get(BASE_URL, params=params, timeout=(5, 15))
             response.raise_for_status()
             return response.json()
+        except requests.exceptions.Timeout:
+            logger.warning(
+                f"Timeout for lat={lat:.2f}, lon={lon:.2f} "
+                f"(attempt {attempt + 1}/{MAX_RETRIES})"
+            )
         except requests.exceptions.HTTPError as e:
             if e.response.status_code == 429:  # Too Many Requests
                 wait_time = (attempt + 1) * RATE_LIMIT_DELAY * 2  # Exponential backoff
